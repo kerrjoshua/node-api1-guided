@@ -68,7 +68,56 @@ server.post('/api/dogs', async (req, res) => {
     }
 })
 // [PUT]    /api/dogs/:id (U of CRUD, update dog with :id using JSON payload)
+server.put('/api/dogs/:id', async (req, res) => {
+    try {
+        const { id }  = req.params;
+        const { name, weight } = req.body;
+        const updatedDog = await Dog.update(id, { name, weight });
+
+        if (!name || !weight) { 
+            res.status(422).json({
+                message: 'dogs need name and weight'
+            })
+        } else {
+            if (updatedDog) {res.status(201).json({
+                message: `successfully updated dogs at id: ${id}`,
+                data: updatedDog
+            })} else {
+                res.status(404).json({
+                    message: `Error updating dog: There is no dog with id ${id}`
+                })
+            }
+
+        }
+    } catch (err) {
+        res.status(500).json({
+            message: `Error updating dog: ${err.message}`,
+        })
+    }
+})
 // [DELETE] /api/dogs/:id (D of CRUD, remove dog with :id)
+server.delete('/api/dogs/:id', async (req, res) => {
+    try {
+        const {id} = req.params
+        const deletedDog = await Dog.delete(id)
+        if (!deletedDog) {
+            res.status(404).json({
+                message: `dog id ${id} not found`
+            })
+        } else {
+            res.json({
+                message: 'dog deleted',
+                data: deletedDog,
+            })
+        }
+
+    } catch {
+        res.status(404).json({
+        message: `Error deleting dog:  ${err.message}`
+    })
+
+    }
+})
 
 // EXPOSING THE SERVER TO OTHER MODULES
 module.exports = server
